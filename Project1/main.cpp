@@ -3,7 +3,7 @@
 #endif 
 
 #include <windows.h>
-#include "myGraphics.h"
+#include "myGraphics.hpp"
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -93,6 +93,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			drawLine(hdc, 300, 300, i, 0, RGB(0, i, 255));
 			drawLine(hdc, 300, 300, i, 600, RGB(255, i, 0));
 		}
+
+		drawCircle(hdc, 300, 300, 200, RGB(255, 200, 200));
+		drawCircle1(hdc, 300, 300, 250, RGB(200, 200, 255));
 			
 		
 		EndPaint(hwnd, &ps);
