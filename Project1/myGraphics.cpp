@@ -27,11 +27,7 @@ void drawLine(HDC hdc, int x1, int y1, int x2, int y2,COLORREF c) {
 		return;
 	}
 	//Bresenham
-	/*if (x1 > x2) {//swap to ensure x1<x2
-		int tx = x1, ty = y1;
-		x1 = x2; y1 = y2;
-		x2 = tx; y2 = ty;
-	}*/
+	
 	int dx = x2 - x1;
 	int dy = y2 - y1;
 	int xsgn = dx > 0 ? 1 : -1;
@@ -55,6 +51,21 @@ void drawLine(HDC hdc, int x1, int y1, int x2, int y2,COLORREF c) {
 				x++;
 				y++;
 				judge += 2 * absdy - 2 * absdx;
+			}
+		}
+	}
+	else {
+		int judge = absdx - absdy;
+		while (y < absdy) {
+			SetPixel(hdc, xsgn*x + x1, ysgn*y + y1, c);
+			if (judge < 0) {
+				y++;
+				judge += 2 * absdx;
+			}
+			else {
+				x++;
+				y++;
+				judge += 2 * absdx - 2 * absdy;
 			}
 		}
 	}

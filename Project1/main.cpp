@@ -87,10 +87,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		FillRect(hdc, &fullRect, CreateSolidBrush(RGB(0, 0, 0)));
 				
 		//»æÖÆ
-		for (int i = 0; i<=600; i += 20)
+		for (int i = 0; i <= 600; i += 20) {
 			drawLine(hdc, 300, 300, 600, i, RGB(i, 0, 255));
-		for (int i = 0; i <= 600; i += 20)
 			drawLine(hdc, 300, 300, 0, i, RGB(i, 255, 0));
+			drawLine(hdc, 300, 300, i, 0, RGB(0, i, 255));
+			drawLine(hdc, 300, 300, i, 600, RGB(255, i, 0));
+		}
+			
 		
 		EndPaint(hwnd, &ps);
 	}
