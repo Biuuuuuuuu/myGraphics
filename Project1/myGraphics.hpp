@@ -135,11 +135,11 @@ inline void drawCircle(HDC hdc, int ox, int oy, int r, COLORREF c) {
 		SetPixel(hdc, ox - y, oy + x, c);
 		SetPixel(hdc, ox - y, oy - x, c);		
 		if (judge > 0) {
-			judge += -2 * x - 2;
+			judge += - x - 1;
 			x++;
 		}
 		else {
-			judge += 2*y - 2*x - 2;
+			judge += y - x - 1;
 			x++;
 			y--;
 		}
@@ -148,6 +148,51 @@ inline void drawCircle(HDC hdc, int ox, int oy, int r, COLORREF c) {
 
 inline void drawCircle(HDC hdc, IVector2 o, int r, COLORREF c) {
 	drawCircle1(hdc, o.x, o.y, r, c);
+}
+
+inline void drawEllipse(HDC hdc, int ox, int oy, int a, int b, COLORREF c) {
+	int x = 0;
+	int y = b;
+	int judge = 0;
+	while ((x*x)*(a*a+b*b)<=a*a*a*a) { //第一象限斜率0到-1部分
+	//while(x<a){
+		SetPixel(hdc, ox + x, oy + y, c);
+		SetPixel(hdc, ox - x, oy + y, c);
+		SetPixel(hdc, ox + x, oy - y, c);
+		SetPixel(hdc, ox - x, oy - y, c);
+		if (judge > 0) {
+			judge += -b*b*(x+1);
+			x++;
+		}
+		else {
+			judge+= -b*b*(x+1)-a*a*(-y+1);
+			x++;
+			y--;
+		} 
+	}
+	y = 0;
+	x = a;
+	judge = 0;
+	while ((y*y)*(a*a + b*b) <= b*b*b*b) { 
+	//while(y<b){
+		SetPixel(hdc, ox + x, oy + y, c);
+		SetPixel(hdc, ox - x, oy + y, c);
+		SetPixel(hdc, ox + x, oy - y, c);
+		SetPixel(hdc, ox - x, oy - y, c);
+		if (judge > 0) {
+			judge += -a*a*(y+1);
+			y++;
+		}
+		else {
+			judge += -a*a*(y+1)-b*b*(1-x);
+			x--;
+			y++;
+		}
+	}
+}
+
+inline void drawEllipse(HDC hdc, IVector2 o, int a, int b, COLORREF c) {
+	drawEllipse(hdc, o.x, o.y, a, b, c);
 }
 
 #else

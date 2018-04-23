@@ -87,17 +87,20 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		FillRect(hdc, &fullRect, CreateSolidBrush(RGB(0, 0, 0)));
 				
 		//»æÖÆ
-		for (int i = 0; i <= 600; i += 20) {
+		/*for (int i = 0; i <= 600; i += 100) {
 			drawLine(hdc, 300, 300, 600, i, RGB(i, 0, 255));
 			drawLine(hdc, 300, 300, 0, i, RGB(i, 255, 0));
 			drawLine(hdc, 300, 300, i, 0, RGB(0, i, 255));
 			drawLine(hdc, 300, 300, i, 600, RGB(255, i, 0));
-		}
+		}*/
 
-		drawCircle(hdc, 300, 300, 200, RGB(255, 200, 200));
-		drawCircle1(hdc, 300, 300, 250, RGB(200, 200, 255));
-			
-		
+		drawCircle(hdc, 300, 300, 200, RGB(255, 100, 100));
+		drawCircle1(hdc, 300, 300, 250, RGB(100, 100, 255));
+		//for(int i=100;i<=320;i+=40)
+		//	drawEllipse(hdc, 400, 100+2*(i-100), i, 50, RGB(100, (i-200)*2, 100));
+		for (int i = 1; i <= 600; i += 40)
+			drawEllipse(hdc, 100 + 4 * (i - 100), 400, 50, i, RGB(100, (i - 200) * 2, 100));
+
 		EndPaint(hwnd, &ps);
 	}
 	return 0;
