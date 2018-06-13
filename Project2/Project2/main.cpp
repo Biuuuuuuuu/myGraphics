@@ -101,6 +101,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		for (int i = 40; i <=400; i += 40)
 			drawEllipse(hdc, 200 + 2 * (i - 100), 700, 50, i, RGB((i - 200) * 2, 50, 100));
 		
+		for (int i = 201; i <= 402; i += 40) {
+			fillDFS(hdc, 200, i, RGB(i/2, 0, 255-i/2));
+		}
+
 		EndPaint(hwnd, &ps);
 	}
 	return 0;

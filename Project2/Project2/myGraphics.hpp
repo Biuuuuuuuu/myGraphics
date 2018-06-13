@@ -1,6 +1,7 @@
 #ifndef MY_GRAPHICS_HPP
 #define MY_GRAPHICS_HPP
 #include <windows.h>
+#include <vector>
 
 struct IVector2 {
 	int x;
@@ -22,6 +23,24 @@ inline int innerProductInt(IVector2 v1, IVector2 v2) {
 }
 inline int innerProductInt(IVector3 v1, IVector3 v2) {
 	return v1.x*v2.x + v1.y*v2.y+v1.z*v2.z;
+}
+
+inline int absInt(int i) {
+	return i >= 0 ? i : -i;
+}
+
+inline int colorDiff(COLORREF c1, COLORREF c2) {
+	int g = absInt(GetGValue(c1) - GetGValue(c2));
+	int b = absInt(GetBValue(c1) - GetBValue(c2));
+	int r = absInt(GetRValue(c1) - GetRValue(c2));
+	return r + g + b;
+}
+
+inline int colorDiffPower2(COLORREF c1, COLORREF c2) {
+	int g = absInt(GetGValue(c1) - GetGValue(c2));
+	int b = absInt(GetBValue(c1) - GetBValue(c2));
+	int r = absInt(GetRValue(c1) - GetRValue(c2));
+	return r * r + g * g + b * b;
 }
 
 inline void drawLine(HDC hdc, int x1, int y1, int x2, int y2,COLORREF c) {
@@ -203,6 +222,83 @@ inline void drawEllipse(HDC hdc, int ox, int oy, int a, int b, COLORREF c) {
 
 inline void drawEllipse(HDC hdc, IVector2 o, int a, int b, COLORREF c) {
 	drawEllipse(hdc, o.x, o.y, a, b, c);
+}
+
+enum  PixelConnectivity {Connect4, Connect8};
+
+inline void fillDFS(HDC hdc, IVector2 o,
+				COLORREF c, PixelConnectivity pc = Connect4) {
+	COLORREF oldC = GetPixel(hdc, o.x, o.y);
+	std::vector<IVector2> fillList;
+	fillList.clear();
+	fillList.push_back(o);
+	while (!fillList.empty()) {
+		IVector2 p = fillList.back();
+		fillList.pop_back();
+		SetPixel(hdc, p.x, p.y, c);
+
+		COLORREF getC;
+		#define SEARCH(dx,dy) getC=GetPixel(hdc, p.x+(dx), p.y+(dy));\
+		if (getC == oldC && getC != c &&absInt(p.x)<5000&&absInt(p.y)<5000)\
+			fillList.emplace_back(p.x+(dx), p.y+(dy))
+		
+		SEARCH(0, 1);
+		SEARCH(1, 0);
+		SEARCH(0, -1);
+		SEARCH(-1, 0);
+
+		if (pc == Connect8) {
+			SEARCH(-1, -1);
+			SEARCH(-1, 1);
+			SEARCH(1, -1);
+			SEARCH(1, 1);
+		}		
+		#undef SEARCH
+	}
+}
+
+inline void fillDFS(HDC hdc, int ox, int oy,
+				COLORREF c, PixelConnectivity pc = Connect4) {
+	IVector2 o(ox, oy);
+	fillDFS(hdc, o, c, pc);
+}
+
+inline void fillApproxDFS(HDC hdc, IVector2 o,
+	COLORREF c, int diff = 0, PixelConnectivity pc = Connect4) {
+	COLORREF oldC = GetPixel(hdc, o.x, o.y);
+	std::vector<IVector2> fillList;
+	fillList.clear();
+	fillList.push_back(o);
+	while (!fillList.empty()) {
+		IVector2 p = fillList.back();
+		fillList.pop_back();
+		SetPixel(hdc, p.x, p.y, c);
+
+		COLORREF getC;
+#define SEARCH(dx,dy) getC=GetPixel(hdc, p.x+(dx), p.y+(dy));\
+		if (colorDiffPower2(getC,oldC)<=diff*diff\
+			&& getC != c &&absInt(p.x)<5000&&absInt(p.y)<5000)\
+			fillList.emplace_back(p.x+(dx), p.y+(dy))
+
+		SEARCH(0, 1);
+		SEARCH(1, 0);
+		SEARCH(0, -1);
+		SEARCH(-1, 0);
+
+		if (pc == Connect8) {
+			SEARCH(-1, -1);
+			SEARCH(-1, 1);
+			SEARCH(1, -1);
+			SEARCH(1, 1);
+		}
+#undef SEARCH
+	}
+}
+
+inline void fillApproxDFS(HDC hdc, int ox, int oy,
+	COLORREF c, int diff = 0, PixelConnectivity pc = Connect4) {
+	IVector2 o(ox, oy);
+	fillApproxDFS(hdc, o, c, diff, pc);
 }
 
 #else
