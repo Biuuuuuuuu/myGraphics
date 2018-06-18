@@ -2,6 +2,8 @@
 #define MY_GRAPHICS_HPP
 #include <windows.h>
 #include <vector>
+#include <list>
+#include <cmath>
 
 struct IVector2 {
 	int x;
@@ -299,6 +301,149 @@ inline void fillApproxDFS(HDC hdc, int ox, int oy,
 	COLORREF c, int diff = 0, PixelConnectivity pc = Connect4) {
 	IVector2 o(ox, oy);
 	fillApproxDFS(hdc, o, c, diff, pc);
+}
+
+//扫描线填充多边形算法使用的数据结构
+struct __Edge {
+	int ymax;
+	double x;
+	double dx;
+};
+
+using __EdgeTable = std::vector<std::list<__Edge>>;
+using __ScanLine = std::list<__Edge>;
+
+//扫描线填充多边形，vertices必须相邻的两个点在一个边上，首尾成一条边，不支持孔
+inline void fillPolygon(HDC hdc,const std::vector<IVector2> &vertices, 
+						COLORREF fillcolor) {
+	__EdgeTable edgeTable;
+	__ScanLine scanLine;//活性边表当前行：当前填充的扫描线（坐标y）
+	edgeTable.clear();
+	scanLine.clear();
+	
+	int polyMinY = 9999;
+	int polyMaxY = -1;
+	//填边表
+	for (auto it = vertices.begin(); it != vertices.end(); it++) {
+		double x1 = it->x;
+		int y1 = it->y;
+		double x2;
+		int y2;
+		if (it != vertices.end()-1) {
+			x2 = (it + 1)->x;
+			y2 = (it + 1)->y;
+		}
+		else {
+			x2 = vertices.front().x;
+			y2 = vertices.front().y;
+		}
+
+		if (y1 > polyMaxY) {
+			polyMaxY = y1;
+			edgeTable.resize(polyMaxY+1);
+		}
+		if (y1 < polyMinY) {
+			polyMinY = y1;
+		}
+
+		if (y1 == y2)continue;//水平边跳过
+		__Edge e;
+		if (y1 < y2) {			
+			e.x = x1;
+			e.ymax = y2;
+			e.dx = (x2 - x1) / (y2 - y1);
+		}
+		else {
+			e.x = x2;
+			e.ymax = y1;
+			e.dx = (x1 - x2) / (y1 - y2);
+		}
+		
+		//将e插入边表，每扫描线中按x,dx升序排序
+		__ScanLine &s = edgeTable[y1<y2?y1:y2];
+		if (s.begin() == s.end())//这个扫描线上还没有边
+			s.insert(s.end(), e);
+		else {
+			auto it = s.begin();
+			while (it != s.end() && 
+				(it->x < e.x || (it->x == e.x && it->dx < e.dx))
+				)
+				it++;
+			s.insert(it, e);			
+		}
+	}//边表初始化完成
+	//迭代当前扫描线（没有实际的活性边表）、填充
+	for (int y = polyMinY; y <= polyMaxY; y++) {
+		__ScanLine &s = edgeTable[y];
+		//将边表纵坐标y的扫描线上的边链表s归并到当前扫描线scanLine
+		for (auto it = s.begin(); it != s.end(); it++) {
+			__Edge &e = *it;
+			if (scanLine.begin() == scanLine.end())//活性边表扫描线上还没有边
+				scanLine.insert(scanLine.end(), e);
+			else {
+				auto slit = scanLine.begin();
+				while (slit != scanLine.end() &&
+					(slit->x < e.x || (slit->x == e.x && slit->dx < e.dx))
+					)
+					slit++;
+				scanLine.insert(slit, e);
+			}
+		}
+
+		//填充内部
+		bool inside = true;
+		for (auto slit = scanLine.begin(); slit != scanLine.end(); slit++) {
+			if (inside) {
+				auto nextit = slit;
+				nextit++;
+				if (nextit == scanLine.end()) continue;
+				double nextx = nextit->x;
+				for (double x = slit->x; x < nextx; x+=1)
+					SetPixel(hdc, (int)floor(x), y, fillcolor);
+				inside = false;
+			}
+			else {
+				inside = true;
+				continue;
+			}
+		}
+
+		//迭代扫描线：删除ymax=y的元素，每个元素的x+=dx
+		auto slit = scanLine.begin();
+		while (slit != scanLine.end()){
+			if (slit->ymax <= y+1) {
+				slit = scanLine.erase(slit);
+			}
+			else {
+				slit->x += slit->dx;
+				slit++;
+			}
+		}
+		__ScanLine nextScanLine;//重新插入排序一下
+		for (auto it = scanLine.begin(); it != scanLine.end(); it++) {
+			__Edge &e = *it;
+			if (nextScanLine.begin() == nextScanLine.end())
+				nextScanLine.insert(nextScanLine.end(), e);
+			else {
+				auto nslit = nextScanLine.begin();
+				while (nslit != nextScanLine.end() &&
+					(nslit->x < e.x || (nslit->x == e.x && nslit->dx < e.dx))
+					)
+					nslit++;
+				nextScanLine.insert(nslit, e);
+			}
+		}
+		scanLine = nextScanLine;
+	}
+}
+
+inline void fillPolygon(HDC hdc, const std::vector<IVector2> &vertices,
+	COLORREF fillcolor, COLORREF linecolor) {
+	fillPolygon(hdc, vertices, fillcolor);
+	for (auto it = vertices.begin(); it != vertices.end() - 1; it++) {
+		drawLine(hdc, *it, *(it + 1), linecolor);
+	}
+	drawLine(hdc, vertices.front(), vertices.back(),linecolor);
 }
 
 #else

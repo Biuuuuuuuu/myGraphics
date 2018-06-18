@@ -101,9 +101,24 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		for (int i = 40; i <=400; i += 40)
 			drawEllipse(hdc, 200 + 2 * (i - 100), 700, 50, i, RGB((i - 200) * 2, 50, 100));
 		
-		for (int i = 201; i <= 402; i += 40) {
+		for (int i = 201; i <= 202; i += 100) {
 			fillDFS(hdc, 200, i, RGB(i/2, 0, 255-i/2));
 		}
+
+		std::vector<IVector2> v;
+		v.emplace_back(25, 25);
+		v.emplace_back(75, 50);
+		v.emplace_back(100, 50);
+		v.emplace_back(100, 75);
+		v.emplace_back(125, 75);
+		v.emplace_back(125, 100);
+		v.emplace_back(75, 75);
+		v.emplace_back(100, 125);
+		v.emplace_back(75, 125);
+		v.emplace_back(50, 125);
+		v.emplace_back(50, 100);
+		v.emplace_back(50, 75);
+		fillPolygon(hdc, v, RGB(2, 100, 200));
 
 		EndPaint(hwnd, &ps);
 	}
