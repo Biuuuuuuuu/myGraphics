@@ -172,6 +172,7 @@ inline void drawCircle(HDC hdc, IVector2 o, int r, COLORREF c) {
 	drawCircle1(hdc, o.x, o.y, r, c);
 }
 
+//Bresenham
 inline void drawEllipse(HDC hdc, int ox, int oy, int a, int b, COLORREF c) {
 	if (a < 0) a = -a;
 	if (b < 0) b = -b;
@@ -228,6 +229,7 @@ inline void drawEllipse(HDC hdc, IVector2 o, int a, int b, COLORREF c) {
 
 enum  PixelConnectivity {Connect4, Connect8};
 
+//漫水填色
 inline void fillDFS(HDC hdc, IVector2 o,
 				COLORREF c, PixelConnectivity pc = Connect4) {
 	COLORREF oldC = GetPixel(hdc, o.x, o.y);
@@ -265,6 +267,7 @@ inline void fillDFS(HDC hdc, int ox, int oy,
 	fillDFS(hdc, o, c, pc);
 }
 
+//漫水填色，填充颜色近似的区域，近似距离diff是RGB基上的欧几里得距离
 inline void fillApproxDFS(HDC hdc, IVector2 o,
 	COLORREF c, int diff = 0, PixelConnectivity pc = Connect4) {
 	COLORREF oldC = GetPixel(hdc, o.x, o.y);
